@@ -152,6 +152,7 @@
   function irPara(id) {
     if (estado.atual !== id) estado.hist.push(estado.atual);
     estado.atual = id;
+    estado.dir = 'frente';
     salvar();
     evento('etapa', { etapa: id });
     render();
@@ -166,6 +167,7 @@
   function voltar() {
     var ant = estado.hist.pop();
     estado.atual = ant || 'inicio';
+    estado.dir = 'tras';
     salvar();
     render();
   }
@@ -225,13 +227,24 @@
     return '<div class="progresso-linha">' +
       '<button type="button" class="voltar" data-acao="voltar" aria-label="Voltar para a pergunta anterior">← Voltar</button>' +
       '<span class="etapa-num">Etapa ' + (idx + 1) + ' de ' + vis.length + '</span></div>' +
-      '<div class="barra" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><i style="width:' + pct + '%"></i></div>';
+      '<div class="barra" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><i style="width:' + pct + '%"></i></div>' +
+      '<div class="incentivo"><span>' + incentivo(idx, vis.length, pct) + '</span>' +
+      (estado.r.valorPago ? '<span class="em-jogo"><i></i>' + reais(estado.r.valorPago) + ' em jogo</span>' : '') + '</div>';
+  }
+
+  function incentivo(idx, total, pct) {
+    var resta = total - (idx + 1);
+    if (idx === 0) return 'Leva cerca de 2 minutos';
+    if (resta === 0) return 'Última etapa 🎯';
+    if (resta === 1) return 'Falta só 1 pergunta';
+    if (pct >= 50) return 'Você já passou da metade 💪';
+    return 'Ótimo começo, continue';
   }
 
   function htmlOpcoes(campo, opcoes, linha) {
     var atual = estado.r[campo];
-    return '<div class="opcoes' + (linha ? ' opcoes-linha' : '') + '" role="group">' + opcoes.map(function (o) {
-      return '<button type="button" class="opcao" data-campo="' + campo + '" data-valor="' + esc(o.v) + '" aria-pressed="' + (atual === o.v) + '" aria-label="' + esc(o.l + (o.d ? '. ' + o.d : '')) + '">' +
+    return '<div class="opcoes' + (linha ? ' opcoes-linha' : '') + '" role="group">' + opcoes.map(function (o, i) {
+      return '<button type="button" style="--i:' + (i + 1) + '" class="opcao" data-campo="' + campo + '" data-valor="' + esc(o.v) + '" aria-pressed="' + (atual === o.v) + '" aria-label="' + esc(o.l + (o.d ? '. ' + o.d : '')) + '">' +
         '<span class="txt"><span class="rot">' + esc(o.l) + '</span>' + (o.d ? '<span class="desc">' + esc(o.d) + '</span>' : '') + '</span>' +
         '<span class="marca" aria-hidden="true"></span></button>';
     }).join('') + '</div>';
@@ -240,14 +253,14 @@
   function telaInicio() {
     return '<section class="tela">' +
       '<span class="sobretitulo">DISTRATO DE LOTE E TERRENO</span>' +
-      '<h1 tabindex="-1">Quer desistir do seu lote? Veja quanto pode voltar para você.</h1>' +
-      '<p class="sub">Rescindindo o contrato com a loteadora, você pode receber de volta <strong>até 90% do que pagou</strong>, corrigido, em parcela única e sem ficar com o nome sujo.</p>' +
+      '<h1 tabindex="-1" class="h-anim">Quer desistir do seu lote? Veja quanto pode voltar para você.</h1>' +
+      '<p class="sub h-anim" style="--i:1">Rescindindo o contrato com a loteadora, você pode receber de volta <strong>até 90% do que pagou</strong>, corrigido, em parcela única e sem ficar com o nome sujo.</p>' +
       '<ul class="selos">' +
-      '<li>Simulação gratuita em cerca de 2 minutos</li>' +
-      '<li>Mostra quanto pode voltar e quanto a loteadora pode reter</li>' +
-      '<li>Também vale para apartamento na planta</li>' +
+      '<li style="--i:2">Simulação gratuita em cerca de 2 minutos</li>' +
+      '<li style="--i:3">Mostra quanto pode voltar e quanto a loteadora pode reter</li>' +
+      '<li style="--i:4">Também vale para apartamento na planta</li>' +
       '</ul>' +
-      '<button type="button" class="btn btn-primario" data-acao="comecar">Calcular minha devolução</button>' +
+      '<button type="button" class="btn btn-primario btn-brilho h-anim" style="--i:5" data-acao="comecar">Calcular minha devolução <span class="seta" aria-hidden="true">→</span></button>' +
       '<p class="confianca">Baseada na Lei do Distrato (Lei 13.786/2018) e em decisões do STJ</p>' +
       '</section>';
   }
@@ -307,7 +320,7 @@
     var r = estado.r;
     return '<section class="tela">' + cabecalho() +
       '<h2 tabindex="-1">Seu resultado está pronto</h2>' +
-      '<p class="sub">Informe seus dados para ver a estimativa do seu caso.</p>' +
+      '<p class="sub">Informe seus dados para desbloquear a estimativa do seu caso.</p>' + htmlCofre() +
       '<form id="form-lead" novalidate>' +
       '<label class="campo"><span class="campo-rot">Seu nome</span>' +
       '<input class="entrada" id="lead-nome" name="name" autocomplete="name" placeholder="Nome e sobrenome" value="' + esc(r.nome || '') + '"></label>' +
@@ -316,14 +329,27 @@
       '<label class="campo"><span class="campo-rot">Seu e-mail <small>(opcional)</small></span>' +
       '<input class="entrada" id="lead-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="voce@email.com" value="' + esc(r.email || '') + '"></label>' +
       '<p class="erro" id="erro" role="alert"></p>' +
-      '<div style="height:6px"></div><button type="submit" class="btn btn-primario">Ver meu resultado</button>' +
+      '<div style="height:6px"></div><button type="submit" class="btn btn-primario btn-brilho">Desbloquear meu resultado <span class="seta" aria-hidden="true">→</span></button>' +
       '<p class="aviso-dados">Seus dados ficam só com a Imóvel Regular Advocacia e são usados para falar sobre o seu caso.</p>' +
       '</form></section>';
+  }
+
+  function htmlCofre() {
+    var prev = null;
+    try { prev = Calc.analisar(estado.r, { valorMinimo: C.valorMinimo, valorQuente: C.valorQuente }); } catch (e) { prev = null; }
+    var rot = 'Sua análise', txt = 'Resultado pronto';
+    if (prev && prev.faixa) {
+      rot = prev.tipoValor === 'indenizacao' ? 'Sua indenização estimada' : 'Sua estimativa de devolução';
+      txt = prev.faixa.min === prev.faixa.max ? reais(prev.faixa.max) : reais(prev.faixa.min) + ' a ' + reais(prev.faixa.max);
+    }
+    return '<div class="cofre"><small>' + rot + '</small><span class="borrado" aria-hidden="true">' + txt + '</span>' +
+      '<span class="cadeado" aria-hidden="true">🔒</span></div>';
   }
 
   function telaCarregando() {
     return '<section class="tela carregando">' +
       '<h2 tabindex="-1">Analisando o seu caso…</h2>' +
+      '<p class="analise-pct" id="analise-pct">0%</p><div class="barra-analise"><i id="analise-barra"></i></div>' +
       '<ul class="passos-analise">' +
       '<li><i></i>Lendo as suas respostas</li>' +
       '<li><i></i>Aplicando a Lei do Distrato e o entendimento do STJ</li>' +
@@ -539,10 +565,19 @@
       else if (p.tipo === 'form') html = telaForm();
     }
     app.innerHTML = html;
+    var sec = app.querySelector('.tela');
+    if (sec) sec.classList.add(estado.dir === 'tras' ? 'ir-tras' : 'ir-frente');
     var foco = app.querySelector('h1, h2');
     if (foco && estado.hist.length) foco.focus({ preventScroll: true });
     if (window.scrollY > 80) window.scrollTo({ top: 0, behavior: 'smooth' });
     ligar(id);
+  }
+
+  function tocar(b) {
+    b.classList.remove('tocou');
+    void b.offsetWidth;
+    b.classList.add('tocou');
+    try { if (navigator.vibrate) navigator.vibrate(8); } catch (e) { /* sem vibração */ }
   }
 
   function mostrarErro(msg, campo) {
@@ -570,6 +605,7 @@
     if (p && p.tipo === 'opcoes') {
       app.querySelectorAll('.opcao').forEach(function (b) {
         b.addEventListener('click', function () {
+          tocar(b);
           estado.r[p.campo] = b.getAttribute('data-valor');
           if (p.campo === 'motivo' && estado.r.motivo !== 'acordo' && estado.r.motivo !== 'assinado') delete estado.r.oferta;
           app.querySelectorAll('.opcao').forEach(function (o) { o.setAttribute('aria-pressed', String(o === b)); });
@@ -584,6 +620,7 @@
       var btn = app.querySelector('[data-acao="avancar-duplo"]');
       app.querySelectorAll('.opcao').forEach(function (b) {
         b.addEventListener('click', function () {
+          tocar(b);
           var campo = b.getAttribute('data-campo');
           estado.r[campo] = b.getAttribute('data-valor');
           app.querySelectorAll('.opcao[data-campo="' + campo + '"]').forEach(function (o) { o.setAttribute('aria-pressed', String(o === b)); });
@@ -686,7 +723,17 @@
       setTimeout(function () { li.classList.add('ativo'); }, i * passo);
       setTimeout(function () { li.classList.add('feito'); }, (i + 1) * passo);
     });
+    var total = itens.length * passo + 300, t0 = Date.now();
+    var elPct = document.getElementById('analise-pct'), elBarra = document.getElementById('analise-barra');
+    var contador = setInterval(function () {
+      var k = Math.min((Date.now() - t0) / total, 1);
+      var v = Math.round(k * 100);
+      if (elPct) elPct.textContent = v + '%';
+      if (elBarra) elBarra.style.width = v + '%';
+      if (k >= 1) clearInterval(contador);
+    }, 40);
     setTimeout(function () {
+      clearInterval(contador);
       estado.hist = estado.hist.filter(function (h) { return h !== 'carregando'; });
       estado.atual = 'resultado';
       salvar();
