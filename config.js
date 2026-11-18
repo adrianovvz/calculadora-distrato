@@ -6,7 +6,7 @@ window.IR_CONFIG = {
   whatsapp: '5531953498526',
 
   // ID do Pixel do Meta (Facebook/Instagram). Vazio = pixel desligado.
-  metaPixelId: '',
+  metaPixelId: '2946037295795542',
 
   // Endereço que recebe cada lead (planilha Google, CRM etc.). Vazio = só WhatsApp.
   webhookUrl: 'https://script.google.com/macros/s/AKfycbyOuAxJwVSTfvjl6FcbINEIPLBK8eyujtuSiYskr1_rD_TZRNtzQ0iwd7iDwy6R5Tfbrw/exec',
