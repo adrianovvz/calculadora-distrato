@@ -3,13 +3,13 @@
  */
 window.IR_CONFIG = {
   // WhatsApp do escritório, só números, com 55 + DDD. Ex.: '5511999999999'
-  whatsapp: '',
+  whatsapp: '5531953498526',
 
   // ID do Pixel do Meta (Facebook/Instagram). Vazio = pixel desligado.
   metaPixelId: '',
 
   // Endereço que recebe cada lead (planilha Google, CRM etc.). Vazio = só WhatsApp.
-  webhookUrl: '',
+  webhookUrl: 'https://script.google.com/macros/s/AKfycbyOuAxJwVSTfvjl6FcbINEIPLBK8eyujtuSiYskr1_rD_TZRNtzQ0iwd7iDwy6R5Tfbrw/exec',
   // Destinos extras, se precisar mandar para mais de um (ex.: CRM e planilha)
   webhookUrls: [],
 
