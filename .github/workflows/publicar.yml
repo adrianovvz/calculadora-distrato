@@ -1,0 +1,40 @@
+name: testar e publicar
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  testar-e-publicar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Testes da conta
+        run: node --test
+      - name: Montar só os arquivos do site
+        run: |
+          mkdir _site
+          cp -r index.html style.css app.js calc.js config.js assets _site/
+          touch _site/.nojekyll
+      - if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+      - if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - if: github.event_name != 'pull_request'
+        id: deploy
+        uses: actions/deploy-pages@v4
