@@ -18,18 +18,17 @@
   function faixaDesistencia(r) {
     var P = r.valorPago, V = r.valorContrato;
     var antiga = r.assinatura === 'ate2018';
-    var min;
-    if (antiga) {
-      min = 0.75; // jurisprudência pré-Lei do Distrato: retenção de 10% a 25% do pago
-    } else if (r.tipo === 'lote') {
-      // Lei 6.766/79, art. 32-A: multa de até 10% do valor do contrato
-      min = Math.max(P - 0.10 * V, 0) / P;
-    } else {
-      min = 0.50; // Lei 4.591/64, art. 67-A: até 25%, ou até 50% com patrimônio de afetação
-    }
+    // Contrato até 2018 e lote: muitas decisões limitam a retenção a 10%–25% do valor pago.
+    // Imóvel na planta depois de 2018: Lei 4.591/64, art. 67-A (até 25%, ou 50% com patrimônio de afetação).
+    var min = (antiga || r.tipo === 'lote') ? 0.75 : 0.50;
     var max = 0.90;
-    if (min > max) min = max;
-    return { pctMin: min, pctMax: max, min: arred(P * min), max: arred(P * max) };
+    var f = { pctMin: min, pctMax: max, min: arred(P * min), max: arred(P * max) };
+    if (r.tipo === 'lote' && !antiga) {
+      // Pior caso pelo contrato: multa de até 10% do valor do contrato (Lei 6.766/79, art. 32-A)
+      var pior = Math.max(P - 0.10 * V, 0);
+      if (pior < f.min) f.piorCaso = arred(pior);
+    }
+    return f;
   }
 
   function faixaIndenizacao(r, regras) {
@@ -115,6 +114,9 @@
         : res.faixa.max >= regras.valorMinimo ? 'morno' : 'frio';
       if (t === 'frio') res.motivoFrio = 'valor';
     }
+    // Parcelas atrasadas ou nome sujo = urgência: quem estava morno sobe para quente
+    res.urgente = r.parcelas === 'atrasadas' || r.parcelas === 'negativado';
+    if (res.urgente && t === 'morno' && (cenario === 'DESISTENCIA' || cenario === 'CULPA')) t = 'quente';
     res.temperatura = t;
     res.codigo = t.charAt(0).toUpperCase() + '-' + cenario;
     return res;

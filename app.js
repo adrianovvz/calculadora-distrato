@@ -12,15 +12,16 @@
 
   // ---------- Textos das opções ----------
   var ROTULOS = {
-    tipo: { planta: 'Apartamento ou casa na planta', lote: 'Lote ou terreno em loteamento', pronto: 'Imóvel pronto, parcelado com a construtora' },
+    tipo: { lote: 'Lote ou terreno em loteamento', planta: 'Apartamento ou casa na planta', pronto: 'Imóvel pronto, parcelado com a construtora' },
     motivo: {
       parcelas: 'As parcelas pesaram',
       sair: 'Mudei de planos e quero sair do contrato',
-      atraso: 'A obra atrasou ou a construtora não cumpriu',
+      atraso: 'As obras atrasaram ou a empresa não cumpriu o combinado',
       acordo: 'Recebi uma proposta de acordo ou distrato',
       assinado: 'Já assinei o distrato e acho que devolveram pouco',
       agio: 'Penso em vender no ágio'
     },
+    parcelas: { emdia: 'Estou em dia', atrasadas: 'Tenho parcelas atrasadas', negativado: 'Já fui cobrado ou estou com o nome sujo' },
     chaves: { sim: 'Sim', nao: 'Não' },
     atraso: { nao: 'Não atrasou', ate6: 'Atrasou até 6 meses', mais6: 'Atrasou mais de 6 meses' },
     mesesAtraso: { '7-12': '7 a 12 meses', '13-24': '1 a 2 anos', '25+': 'Mais de 2 anos' },
@@ -39,8 +40,8 @@
       titulo: 'Que tipo de imóvel você comprou?',
       texto: 'Isso muda as regras do distrato.',
       opcoes: [
-        op('tipo', 'planta', 'Comprado da construtora, em obra ou recém-entregue'),
         op('tipo', 'lote', 'Comprado parcelado direto da loteadora'),
+        op('tipo', 'planta', 'Comprado da construtora, em obra ou recém-entregue'),
         op('tipo', 'pronto', 'Já estava construído quando você comprou')
       ]
     },
@@ -49,6 +50,12 @@
       titulo: 'O que está acontecendo com o seu contrato?',
       texto: 'Escolha a opção mais parecida com a sua situação.',
       opcoes: ['parcelas', 'sair', 'atraso', 'acordo', 'assinado', 'agio'].map(function (v) { return op('motivo', v); })
+    },
+    {
+      id: 'parcelas', tipo: 'opcoes', campo: 'parcelas',
+      titulo: 'Como estão as suas parcelas hoje?',
+      texto: 'Isso ajuda a ver se é preciso agir rápido para proteger o seu nome.',
+      opcoes: [op('parcelas', 'emdia'), op('parcelas', 'atrasadas'), op('parcelas', 'negativado')]
     },
     { id: 'valores', tipo: 'valores' },
     { id: 'oferta', tipo: 'oferta', mostrar: function (r) { return r.motivo === 'acordo' || r.motivo === 'assinado'; } },
@@ -61,12 +68,6 @@
       opcoes: [op('mesesAtraso', '7-12'), op('mesesAtraso', '13-24'), op('mesesAtraso', '25+')]
     },
     { id: 'contrato', tipo: 'duplo' },
-    {
-      id: 'corretagem', tipo: 'opcoes', campo: 'corretagem', linha: true,
-      titulo: 'Você pagou comissão de corretagem na compra?',
-      texto: 'Às vezes ela aparece no recibo como “assessoria” ou “intermediação”.',
-      opcoes: [op('corretagem', 'sim'), op('corretagem', 'nao'), op('corretagem', 'naosei')]
-    },
     {
       id: 'origem', tipo: 'opcoes', campo: 'origem', linha: true,
       titulo: 'Por onde você nos conheceu?',
@@ -238,13 +239,13 @@
 
   function telaInicio() {
     return '<section class="tela">' +
-      '<span class="sobretitulo">CALCULADORA DE DISTRATO</span>' +
-      '<h1 tabindex="-1">Quanto você pode recuperar se sair do contrato do seu imóvel?</h1>' +
-      '<p class="sub">Responda algumas perguntas rápidas e veja uma estimativa do valor que pode voltar para você.</p>' +
+      '<span class="sobretitulo">DISTRATO DE LOTE E TERRENO</span>' +
+      '<h1 tabindex="-1">Quer desistir do seu lote? Veja quanto pode voltar para você.</h1>' +
+      '<p class="sub">Rescindindo o contrato com a loteadora, você pode receber de volta <strong>até 90% do que pagou</strong>, corrigido, em parcela única e sem ficar com o nome sujo.</p>' +
       '<ul class="selos">' +
-      '<li>Leva cerca de 2 minutos</li>' +
-      '<li>Gratuito e sem compromisso</li>' +
-      '<li>Para apartamento na planta, lote ou imóvel parcelado com a construtora</li>' +
+      '<li>Simulação gratuita em cerca de 2 minutos</li>' +
+      '<li>Mostra quanto pode voltar e quanto a loteadora pode reter</li>' +
+      '<li>Também vale para apartamento na planta</li>' +
       '</ul>' +
       '<button type="button" class="btn btn-primario" data-acao="comecar">Calcular minha devolução</button>' +
       '<p class="confianca">Baseada na Lei do Distrato (Lei 13.786/2018) e em decisões do STJ</p>' +
@@ -363,10 +364,16 @@
         if (antiga) {
           t.fundamentos.push('Para contratos assinados até 2018, a Justiça costuma limitar o desconto a algo entre 10% e 25% do valor pago. <small>Súmula 543 do STJ</small>');
         } else if (lote) {
-          t.fundamentos.push('Em loteamentos, a multa por desistência é limitada a 10% do valor do contrato, além de taxas e corretagem. <small>Lei 6.766/79, art. 32-A</small>');
+          t.fundamentos.push('Em loteamentos, a lei limita a multa por desistência a 10% do valor do contrato, além de taxas. Muitas decisões, porém, limitam a retenção a algo entre 10% e 25% do que você pagou. <small>Lei 6.766/79, art. 32-A</small>');
+          if (res.faixa.piorCaso !== undefined) {
+            t.atencao.push('Se a loteadora aplicar a multa máxima do contrato, ' +
+              (res.faixa.piorCaso < 1000 ? 'ela poderia ficar com quase tudo o que você pagou' : 'a devolução cairia para cerca de ' + reais(res.faixa.piorCaso)) +
+              '. Esse desconto pode ser questionado na Justiça.');
+          }
         } else {
           t.fundamentos.push('A Lei do Distrato permite reter até 25% do que você pagou, ou até 50% em empreendimentos com patrimônio de afetação. Descontos acima disso podem ser questionados. <small>Lei 4.591/64, art. 67-A</small>');
         }
+        t.fundamentos.push('A construtora costuma querer devolver em várias parcelas. Na Justiça, é possível pedir a devolução corrigida e de uma vez só. <small>Súmula 543 do STJ</small>');
         if (r.assinatura === 'naosei') t.fundamentos.push('Como você não lembra a data do contrato, usamos a regra mais rigorosa. Se ele for de 2018 ou antes, o valor tende a ser maior.');
         if (posse) {
           t.atencao.push(lote
@@ -396,6 +403,9 @@
         ? 'o distrato que você assinou pode ter devolvido menos do que deveria'
         : 'a proposta da construtora pode estar abaixo do que você pode receber';
     }
+    if (res.urgente && res.temperatura !== 'frio') {
+      t.atencao.push('Com parcelas atrasadas, o nome pode ir para a lista de inadimplentes. Na ação de distrato, é comum pedir ao juiz que suspenda as parcelas e impeça a negativação enquanto o caso corre. Quanto antes, melhor.');
+    }
     if (r.motivo === 'assinado') {
       t.atencao.push('Distrato já assinado pode ser revisto quando há desconto abusivo, mas é preciso analisar o documento e os prazos.');
     }
@@ -417,7 +427,7 @@
     else html += '<span data-contar="' + f.min + '">' + reais(f.min) + '</span><span class="a">a</span><span data-contar="' + f.max + '">' + reais(f.max) + '</span>';
     html += '</p>';
     if (res.tipoValor === 'devolucao') {
-      html += '<p class="valor-sub">dos ' + reais(r.valorPago) + ' que você pagou' + (res.cenario === 'CULPA' ? ', com correção' : '') + '</p>';
+      html += '<p class="valor-sub">dos ' + reais(r.valorPago) + ' que você pagou, com correção' + '</p>';
       var a = Math.round(f.pctMin * 100), b = Math.round(f.pctMax * 100);
       html += '<div class="divisao"><div class="divisao-barra" aria-hidden="true"><span class="seg-min" style="width:' + a + '%"></span><span class="seg-faixa" style="width:' + (b - a) + '%"></span></div>' +
         '<div class="divisao-legenda"><span>Pode voltar para você: <b>' + (a === b ? a + '%' : a + '% a ' + b + '%') + '</b></span>' +
@@ -462,7 +472,8 @@
     if (r.tipo !== 'pronto') linhas.push('Atraso: ' + ROTULOS.atraso[r.atraso] + (r.mesesAtraso ? ' (' + ROTULOS.mesesAtraso[r.mesesAtraso] + ')' : ''));
     linhas.push('Contrato assinado: ' + ROTULOS.assinatura[r.assinatura]);
     linhas.push('Pagamento: ' + ROTULOS.pagamento[r.pagamento]);
-    linhas.push('Pagou corretagem: ' + ROTULOS.corretagem[r.corretagem]);
+    if (r.parcelas) linhas.push('Parcelas: ' + ROTULOS.parcelas[r.parcelas]);
+    if (r.corretagem) linhas.push('Pagou corretagem: ' + ROTULOS.corretagem[r.corretagem]);
     if (res.faixa) linhas.push('Estimativa: ' + (res.faixa.min === res.faixa.max ? reais(res.faixa.max) : reais(res.faixa.min) + ' a ' + reais(res.faixa.max)));
     linhas.push('Código: ' + res.codigo);
     linhas.push('');
@@ -702,6 +713,7 @@
       assinatura: ROTULOS.assinatura[r.assinatura] || '', pagamento: ROTULOS.pagamento[r.pagamento] || '',
       corretagem: ROTULOS.corretagem[r.corretagem] || '',
       origem: ROTULOS.origem[r.origem] || '',
+      parcelas: ROTULOS.parcelas[r.parcelas] || '',
       utm: UTM, pagina: location.href.split('#')[0]
     };
     var corpo = JSON.stringify(dados);

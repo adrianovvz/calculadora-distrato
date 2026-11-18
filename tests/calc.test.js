@@ -34,15 +34,16 @@ test('desistência em contrato até 2018: 75% a 90% do pago', () => {
   assert.deepEqual([r.faixa.min, r.faixa.max], [45000, 54000]);
 });
 
-test('lote: multa limitada a 10% do valor do contrato', () => {
+test('lote: faixa de 75% a 90% do pago e pior caso do contrato à parte', () => {
   const r = caso({ tipo: 'lote', valorContrato: 100000, valorPago: 30000 });
-  assert.deepEqual([r.faixa.min, r.faixa.max], [20000, 27000]);
+  assert.deepEqual([r.faixa.min, r.faixa.max], [22500, 27000]);
+  assert.equal(r.faixa.piorCaso, 20000); // 30 mil - 10% de 100 mil
 });
 
-test('lote com pouco pago: mínimo nunca fica negativo', () => {
+test('lote com pouco pago: faixa nunca mostra R$ 0, pior caso nunca negativo', () => {
   const r = caso({ tipo: 'lote', valorContrato: 100000, valorPago: 8000 });
-  assert.equal(r.faixa.min, 0);
-  assert.equal(r.faixa.max, 7200);
+  assert.deepEqual([r.faixa.min, r.faixa.max], [6000, 7200]);
+  assert.equal(r.faixa.piorCaso, 0);
   assert.equal(r.temperatura, 'morno');
 });
 
@@ -100,6 +101,27 @@ test('imóvel pronto ignora pergunta de atraso de obra', () => {
 test('valores inválidos são recusados', () => {
   assert.throws(() => caso({ valorPago: 0 }));
   assert.throws(() => caso({ valorContrato: NaN }));
+});
+
+test('oferta principal: lote devolve no máximo 90% do pago', () => {
+  const r = caso({ tipo: 'lote', valorContrato: 120000, valorPago: 50000 });
+  assert.equal(r.faixa.max, 45000);
+  assert.equal(r.faixa.pctMax, 0.9);
+  assert.equal(r.faixa.min, 37500);
+  assert.equal(r.faixa.piorCaso, undefined); // 50 mil - 12 mil = 38 mil, acima do mínimo
+});
+
+test('parcelas atrasadas: lead morno de desistência vira quente', () => {
+  const morno = caso({ valorPago: 12000 });
+  assert.equal(morno.temperatura, 'morno');
+  const urgente = caso({ valorPago: 12000, parcelas: 'negativado' });
+  assert.equal(urgente.temperatura, 'quente');
+  assert.equal(urgente.urgente, true);
+});
+
+test('parcelas atrasadas não tiram lead do frio', () => {
+  assert.equal(caso({ pagamento: 'banco', parcelas: 'atrasadas' }).temperatura, 'frio');
+  assert.equal(caso({ valorPago: 3000, parcelas: 'atrasadas' }).temperatura, 'frio');
 });
 
 test('cortes do filtro podem ser ajustados pela configuração', () => {

@@ -26,9 +26,10 @@ Testes: `node --test` (17 casos). Rodam também no GitHub a cada envio; se falha
 5. Entrega: recebeu as chaves (lote: construiu/mora)? + atrasou? (não / até 6 meses / mais de 6)
 6. *(só se atraso > 6 meses)* quanto tempo: 7–12 meses / 1–2 anos / mais de 2 anos
 7. Contrato: assinado até 2018 / de 2019 em diante / não lembro + como paga (direto / banco / quitado)
-8. Pagou corretagem?
-9. Por onde nos conheceu
-10. Nome, WhatsApp, e-mail (opcional)
+8. Por onde nos conheceu
+9. Nome, WhatsApp, e-mail (opcional)
+
+(Pergunta de parcelas — em dia / atrasadas / nome sujo — entra logo depois do item 2. A pergunta de corretagem saiu para encurtar o funil.)
 
 ## Cenários e conta
 
@@ -38,7 +39,7 @@ Testes: `node --test` (17 casos). Rodam também no GitHub a cada envio; se falha
 |---|---|---|---|
 | `CULPA` | atraso > 6 meses e sem chaves | devolução de 100% de `P` + indenização de `min/max(1%·P·m ; 0,5%·V·m)` | quente |
 | `INDENIZACAO` | atraso > 6 meses e já com chaves | indenização `min/max(1%·P·m ; 0,5%·V·m)` | quente se máx ≥ R$ 15 mil, senão morno |
-| `DESISTENCIA` | sem chaves, sem atraso longo, pagando direto ou quitado | contrato até 2018: 75%–90% de `P`; depois (planta/pronto): 50%–90%; lote: `(P − 10%·V)` a 90% | quente se máx ≥ R$ 15 mil; morno se ≥ R$ 5 mil; senão frio |
+| `DESISTENCIA` | sem chaves, sem atraso longo, pagando direto ou quitado | contrato até 2018 ou lote: 75%–90% de `P`; planta/pronto depois de 2018: 50%–90%. Lote mostra à parte o pior caso do contrato: `P − 10%·V` | quente se máx ≥ R$ 15 mil; morno se ≥ R$ 5 mil; senão frio |
 | `DESISTENCIA_POSSE` | com chaves, pagando direto | mesma faixa, avisando o desconto pelo uso (0,5%·V/mês; lote 0,75%) | morno |
 | `BANCO` | sem chaves, sem atraso longo, financiamento bancário assinado | sem valor | frio (morno se recebeu proposta de acordo) |
 | `SEM_BASE` | com chaves, sem atraso longo, banco ou quitado | sem valor | frio (morno se recebeu proposta de acordo) |
@@ -46,6 +47,8 @@ Testes: `node --test` (17 casos). Rodam também no GitHub a cada envio; se falha
 `m` = meses indenizáveis já descontada a tolerância de 6 meses: 7–12 → 3; 1–2 anos → 12; mais de 2 anos → 24.
 
 Regras extras:
+- Oferta principal (18/11/2026): distrato de lote — "você pode receber de volta até 90% do que pagou, corrigido, em parcela única e sem ficar com o nome sujo". Lote é a primeira opção e a abertura fala de lote.
+- Parcelas atrasadas ou nome sujo: morno de desistência/culpa vira quente (urgência) e o resultado explica o pedido de suspensão das parcelas e da negativação.
 - Valor pago abaixo de R$ 5 mil → frio (custo da ação perto do que se recupera).
 - Proposta de acordo: compara com a faixa. Diferença ≥ R$ 15 mil → quente; senão morno.
 - Distrato já assinado: diferença ≥ R$ 30 mil → quente; ≥ R$ 5 mil → morno; senão frio.

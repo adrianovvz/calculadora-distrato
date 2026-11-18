@@ -16,7 +16,7 @@ function doPost(e) {
       d.indenizacao_min, d.indenizacao_max, d.diferenca_proposta, d.chaves, d.atraso,
       d.meses_atraso, d.assinatura, d.pagamento, d.corretagem, d.origem,
       u.utm_source, u.utm_medium, u.utm_campaign, u.utm_content, u.utm_term, u.fbclid, u.gclid,
-      d.pagina
+      d.pagina, d.parcelas
     ].map(limpar);
     aba.appendRow(linha);
     return ContentService.createTextOutput('ok');
