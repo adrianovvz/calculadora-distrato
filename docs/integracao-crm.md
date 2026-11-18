@@ -2,7 +2,7 @@
 
 **Para:** programador responsável pelo CRM
 **De:** Grupo VVZ (calculadora da Imóvel Regular Advocacia)
-**Página:** https://adrianovvz.github.io/calculadora-distrato/
+**Página:** https://calculadora.imovelregular.online
 
 ## Como a página envia o lead
 
@@ -58,7 +58,7 @@ A calculadora é um site estático. No fim da simulação, **o navegador do visi
     "utm_content": "video-01",
     "fbclid": "IwAR..."
   },
-  "pagina": "https://adrianovvz.github.io/calculadora-distrato/"
+  "pagina": "https://calculadora.imovelregular.online/"
 }
 ```
 

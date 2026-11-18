@@ -2,7 +2,9 @@
 
 Página de captação que filtra leads de distrato imobiliário, com marca, regras e textos próprios da Imóvel Regular.
 
-No ar: https://adrianovvz.github.io/calculadora-distrato/ (GitHub Pages, publicado a cada envio para `main`, só se os testes passarem).
+No ar: https://calculadora.imovelregular.online (desde 18/11/2026; o link antigo https://adrianovvz.github.io/calculadora-distrato/ redireciona para ele, mantendo os parâmetros de URL). Hospedagem: GitHub Pages, publicado a cada envio para `main`, só se os testes passarem.
+
+Domínio: registro CNAME `calculadora` → `adrianovvz.github.io` (TTL 300) no DNS da Hostinger do imovelregular.online, criado em 18/11/2026. O domínio principal e os outros registros (www, proposta, verificações do chatgpt.site) não foram tocados.
 
 ## Arquivos
 
