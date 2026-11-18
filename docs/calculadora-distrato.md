@@ -82,7 +82,7 @@ Base legal citada na tela: Lei 13.786/2018 (Lei do Distrato), Lei 4.591/64 arts.
 Editar `config.js`:
 - `whatsapp`: número com 55 + DDD, só dígitos.
 - `metaPixelId`: ID do pixel da conta de anúncios da Imóvel Regular.
-- `webhookUrl`: endereço que recebe o lead em JSON (planilha/CRM). O envio usa `text/plain` para funcionar com Google Apps Script sem bloqueio de CORS.
+- `webhookUrl` e `webhookUrls`: endereços que recebem o lead em JSON (CRM, planilha). Pode ter mais de um. Especificação para o programador do CRM: `docs/integracao-crm.md`. O envio usa `text/plain` para funcionar com Google Apps Script sem bloqueio de CORS.
 - `oab`: registro exibido no rodapé.
 - `valorMinimo` / `valorQuente`: cortes do filtro.
 

@@ -10,6 +10,8 @@ window.IR_CONFIG = {
 
   // Endereço que recebe cada lead (planilha Google, CRM etc.). Vazio = só WhatsApp.
   webhookUrl: '',
+  // Destinos extras, se precisar mandar para mais de um (ex.: CRM e planilha)
+  webhookUrls: [],
 
   instagram: 'https://www.instagram.com/imovelregular.advocacia/',
   instagramUsuario: '@imovelregular.advocacia',

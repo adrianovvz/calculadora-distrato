@@ -695,7 +695,9 @@
   }
 
   function enviarLead(res) {
-    if (!C.webhookUrl) return;
+    // Um ou mais destinos: webhookUrl (texto) e/ou webhookUrls (lista) — ex.: CRM + planilha
+    var destinos = [].concat(C.webhookUrl || [], C.webhookUrls || []).filter(Boolean);
+    if (!destinos.length) return;
     var r = estado.r;
     var dados = {
       data: new Date().toISOString(),
@@ -717,12 +719,14 @@
       utm: UTM, pagina: location.href.split('#')[0]
     };
     var corpo = JSON.stringify(dados);
-    try {
-      if (navigator.sendBeacon && navigator.sendBeacon(C.webhookUrl, new Blob([corpo], { type: 'text/plain;charset=UTF-8' }))) return;
-    } catch (e) { /* tenta fetch */ }
-    try {
-      fetch(C.webhookUrl, { method: 'POST', mode: 'no-cors', keepalive: true, headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: corpo }).catch(function () {});
-    } catch (e) { /* sem rede */ }
+    destinos.forEach(function (url) {
+      try {
+        if (navigator.sendBeacon && navigator.sendBeacon(url, new Blob([corpo], { type: 'text/plain;charset=UTF-8' }))) return;
+      } catch (e) { /* tenta fetch */ }
+      try {
+        fetch(url, { method: 'POST', mode: 'no-cors', keepalive: true, headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: corpo }).catch(function () {});
+      } catch (e) { /* sem rede */ }
+    });
   }
 
   function contarNumeros() {
