@@ -83,7 +83,7 @@ Base legal citada na tela: Lei 13.786/2018 (Lei do Distrato), Lei 4.591/64 arts.
 
 Editar `config.js`:
 - `whatsapp`: número com 55 + DDD, só dígitos.
-- `metaPixelId`: ID do pixel da conta de anúncios da Imóvel Regular.
+- `metaPixelId`: ID do pixel da conta de anúncios da Imóvel Regular. Em uso: `2946037295795542` ("Pixel - AdvocaciaIMOB - imovelregular.online", conta de anúncios CA - AdvocaciaIMOB, portfólio "BM saudeverdadeira 1"). Conferido no Gerenciador de Eventos em 25/11/2026: recebeu PageView, ViewContent, InitiateCheckout e Lead do teste de 18/11, com o site calculadora.imovelregular.online ligado. Não é pixel do Grupo VVZ.
 - `webhookUrl` e `webhookUrls`: endereços que recebem o lead em JSON (CRM, planilha). Pode ter mais de um. Especificação para o programador do CRM: `docs/integracao-crm.md`. O envio usa `text/plain` para funcionar com Google Apps Script sem bloqueio de CORS.
 - `oab`: registro exibido no rodapé.
 - `valorMinimo` / `valorQuente`: cortes do filtro.
